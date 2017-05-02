@@ -60,10 +60,6 @@ function GM:InitPostEntity()
      net.WriteBool(GetConVar("ttt_spectator_mode"):GetBool())
    net.SendToServer()
 
-   if not game.SinglePlayer() then
-      timer.Create("idlecheck", 5, 0, CheckIdle)
-   end
-
    -- make sure player class extensions are loaded up, and then do some
    -- initialization on them
    if IsValid(LocalPlayer()) and LocalPlayer().GetTraitor then
@@ -326,59 +322,6 @@ function GM:Tick()
       end
 
       VOICE.Tick()
-   end
-end
-
-
--- Simple client-based idle checking
-local idle = {ang = nil, pos = nil, mx = 0, my = 0, t = 0}
-function CheckIdle()
-   local client = LocalPlayer()
-   if not IsValid(client) then return end
-
-   if not idle.ang or not idle.pos then
-      -- init things
-      idle.ang = client:GetAngles()
-      idle.pos = client:GetPos()
-      idle.mx = gui.MouseX()
-      idle.my = gui.MouseY()
-      idle.t = CurTime()
-
-      return
-   end
-
-   if GetRoundState() == ROUND_ACTIVE and client:IsTerror() and client:Alive() then
-      local idle_limit = GetGlobalInt("ttt_idle_limit", 300) or 300
-      if idle_limit <= 0 then idle_limit = 300 end -- networking sucks sometimes
-
-
-      if client:GetAngles() != idle.ang then
-         -- Normal players will move their viewing angles all the time
-         idle.ang = client:GetAngles()
-         idle.t = CurTime()
-      elseif gui.MouseX() != idle.mx or gui.MouseY() != idle.my then
-         -- Players in eg. the Help will move their mouse occasionally
-         idle.mx = gui.MouseX()
-         idle.my = gui.MouseY()
-         idle.t = CurTime()
-      elseif client:GetPos():Distance(idle.pos) > 10 then
-         -- Even if players don't move their mouse, they might still walk
-         idle.pos = client:GetPos()
-         idle.t = CurTime()
-      elseif CurTime() > (idle.t + idle_limit) then
-         RunConsoleCommand("say", "(AUTOMATED MESSAGE) I have been moved to the Spectator team because I was idle/AFK.")
-
-         timer.Simple(0.3, function()
-                              RunConsoleCommand("ttt_spectator_mode", 1)
-                               net.Start("TTT_Spectate")
-                                 net.WriteBool(true)
-                               net.SendToServer()
-                              RunConsoleCommand("ttt_cl_idlepopup")
-                           end)
-      elseif CurTime() > (idle.t + (idle_limit / 2)) then
-         -- will repeat
-         LANG.Msg("idle_warning")
-      end
    end
 end
 
