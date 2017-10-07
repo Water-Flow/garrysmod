@@ -25,7 +25,7 @@ SWEP.Primary.Cone          = 0.02
 SWEP.Primary.ClipSize      = 8
 SWEP.Primary.ClipMax       = 36
 SWEP.Primary.DefaultClip   = 8
-SWEP.Primary.Automatic     = true
+SWEP.Primary.Automatic     = false
 SWEP.Primary.Sound         = Sound( "Weapon_Deagle.Single" )
 
 SWEP.HeadshotMultiplier    = 4
